@@ -1,0 +1,53 @@
+﻿# 🐍 Python 编译缓存
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*$py.class
+
+# 📦 虚拟环境与依赖
+.venv/
+env/
+venv/
+ENV/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# 🧪 VSCode / PyCharm 项目配置
+.vscode/
+.idea/
+
+# ⚙️ 系统文件
+.DS_Store
+Thumbs.db
+
+# 🔐 环境配置与敏感信息
+.env
+*.env
+
+# 🪣 日志文件
+logs/
+*.log
+
+# 🗄️ 数据库文件（如果本地有 SQLite）
+db.sqlite3
+
+# 🐳 Docker 运行数据
+**/docker-data/
+**/mysql-data/
+*.pid
+
+# 🚀 缓存文件
+.cache/
+__pypackages__/
+.ipynb_checkpoints/
+pytest_cache/
+.mypy_cache/
+
+# 🧰 Jupyter / 临时测试文件
+*.ipynb
+*.bak
+*.tmp
+*.swp

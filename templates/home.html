@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>JobMiner</title>
+
+    <!-- Favicon & App Icons -->
+    <link rel="icon" type="image/x-icon" href="/static/img/favicon/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/static/img/favicon/favicon.svg">
+    <link rel="apple-touch-icon" href="/static/img/favicon/apple-touch-icon.png">
+    <link rel="manifest" href="/static/img/favicon/site.webmanifest">
+
+    <!-- Android Web App Icons -->
+    <link rel="icon" sizes="192x192" href="/static/img/favicon/web-app-manifest-192x192.png">
+    <link rel="icon" sizes="512x512" href="/static/img/favicon/web-app-manifest-512x512.png">
+
+    <!-- Fallback PNG for older browsers -->
+    <link rel="icon" type="image/png" sizes="96x96" href="/static/img/favicon/favicon-96x96.png">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">
+            <img src="/static/img/jobminer_logo.svg" alt="JobMiner" height="45">
+        </div>
+        <div class="menu">
+            <a href="/">Home</a>
+            <a href="/docs">Docs</a>
+            <a href="/docs">API</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="https://github.com/yyylegend" target="_blank">GitHub</a>
+            <button class="theme-toggle" id="themeToggle">🌙</button>
+        </div>
+    </nav>
+
+    <header>
+        <h1>JobMiner Dashboard</h1>
+        <p>Explore job analytics, skill trends, and salary insights — all in one place.</p>
+    </header>
+
+    <main>
+        <div class="cards">
+            <a href="/api/jobs" class="card">
+                <h2>📂 View Jobs API</h2>
+                <p>Fetch structured job listings and company details.</p>
+            </a>
+            <a href="/api/skills/top" class="card">
+                <h2>🧠 Skills Analytics</h2>
+                <p>See which technical skills appear most frequently across postings.</p>
+            </a>
+            <a href="/api/stats/salary" class="card">
+                <h2>💰 Salary Statistics</h2>
+                <p>Compare average salaries by city or by job title.</p>
+            </a>
+            <a href="/dashboard" class="card">
+                <h2>📊 Visualization Dashboard</h2>
+                <p>View interactive charts of skills demand and salary insights.</p>
+            </a>
+            <a href="/docs" class="card">
+                <h2>⚙️ API Documentation</h2>
+                <p>Explore and test endpoints interactively using Swagger UI.</p>
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        © 2025 JobMiner | Built with FastAPI & MySQL | Designed in Python 💜
+    </footer>
+
+    <script src="/static/js/theme.js"></script>
+</body>
+</html>

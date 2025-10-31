@@ -1,0 +1,147 @@
+﻿:root {
+    --bg-color: #f7f9fc;
+    --text-color: #333;
+    --card-bg: #fff;
+    --nav-bg: #4f5b93;
+    --nav-text: #ddd;
+    --nav-hover: #fff;
+    --border-color: #e1e1e1;
+}
+
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #f1f1f1;
+    --card-bg: #1e1e1e;
+    --nav-bg: #2f365d;
+    --nav-text: #bbb;
+    --nav-hover: #fff;
+    --border-color: #333;
+}
+
+body {
+    font-family: "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.4s, color 0.4s;
+}
+
+nav {
+    background-color: var(--nav-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 50px;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: background-color 0.4s;
+}
+
+nav .logo {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+nav .logo span {
+    color: #f1c40f;
+}
+
+nav .logo img {
+    height: 45px;
+    vertical-align: middle;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    transition: transform 0.3s;
+}
+
+nav .logo img:hover {
+    transform: scale(1.05);
+}
+
+nav .menu a {
+    color: var(--nav-text);
+    text-decoration: none;
+    margin-left: 25px;
+    font-size: 15px;
+    transition: color 0.2s ease;
+}
+
+nav .menu a:hover {
+    color: var(--nav-hover);
+}
+
+.theme-toggle {
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--nav-text);
+    font-size: 20px;
+    margin-left: 20px;
+    transition: color 0.3s;
+}
+.theme-toggle:hover {
+    color: var(--nav-hover);
+}
+
+header {
+    text-align: center;
+    padding: 80px 20px 40px 20px;
+}
+header h1 {
+    font-size: 48px;
+    font-weight: bold;
+    color: #3b2d7d;
+}
+header p {
+    color: #666;
+    font-size: 18px;
+}
+[data-theme="dark"] header h1 {
+    color: #c7b5ff;
+}
+[data-theme="dark"] header p {
+    color: #ccc;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    max-width: 1000px;
+    margin: 60px auto;
+    padding: 0 20px;
+}
+.card {
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    border-top: 4px solid #4c3fc1;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    border-top: 4px solid #8892bf;
+}
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+}
+
+footer {
+    text-align: center;
+    font-size: 13px;
+    color: #aaa;
+    margin-top: 80px;
+    padding: 20px 0;
+    border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 600px) {
+    nav {
+        flex-direction: column;
+        text-align: center;
+    }
+    nav .menu a {
+        margin: 8px;
+    }
+}

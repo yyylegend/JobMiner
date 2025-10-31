@@ -1,0 +1,12 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="220" height="80" viewBox="0 0 220 80">
+  <!-- 背景椭圆 -->
+  <ellipse cx="110" cy="40" rx="100" ry="32" fill="#4f5b93" />
+  <!-- 外层光晕 -->
+  <ellipse cx="110" cy="40" rx="100" ry="32" fill="none" stroke="#8892bf" stroke-width="4" />
+  <!-- 字体部分 -->
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
+        font-family="Segoe UI, Ubuntu, sans-serif"
+        font-size="28" fill="#ffffff" font-weight="bold">
+    JobMiner
+  </text>
+</svg>
