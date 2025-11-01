@@ -25,41 +25,40 @@
             <img src="/static/img/jobminer_logo.svg" alt="JobMiner" height="45">
         </div>
         <div class="menu">
-            <a href="/">Home</a>
-            <a href="/docs">Docs</a>
-            <a href="/docs">API</a>
-            <a href="/dashboard">Dashboard</a>
+            <a href="/">主页</a>
+            <a href="/docs">文档</a>
+            <a href="/dashboard">JobMiner数据面板</a>
             <a href="https://github.com/yyylegend" target="_blank">GitHub</a>
-            <button class="theme-toggle" id="themeToggle">🌙</button>
+            <button class="theme-toggle" id="theme-toggle">🌙</button>
         </div>
     </nav>
 
     <header>
-        <h1>JobMiner Dashboard</h1>
-        <p>Explore job analytics, skill trends, and salary insights — all in one place.</p>
+        <h1>JobMiner</h1>
+        <p>探索工作分析，技能趋势和薪资见解-都在这里</p>
     </header>
 
     <main>
         <div class="cards">
             <a href="/api/jobs" class="card">
-                <h2>📂 View Jobs API</h2>
-                <p>Fetch structured job listings and company details.</p>
+                <h2>📂 查看岗位</h2>
+                <p>获取结构化的职位列表和公司详细信息</p>
             </a>
             <a href="/api/skills/top" class="card">
-                <h2>🧠 Skills Analytics</h2>
-                <p>See which technical skills appear most frequently across postings.</p>
+                <h2>🧠 技能分析</h2>
+                <p>看看哪些技术技能在职位发布中出现得最频繁</p>
             </a>
             <a href="/api/stats/salary" class="card">
-                <h2>💰 Salary Statistics</h2>
-                <p>Compare average salaries by city or by job title.</p>
+                <h2>💰 薪资统计</h2>
+                <p>比较不同城市或职位的平均工资</p>
             </a>
             <a href="/dashboard" class="card">
-                <h2>📊 Visualization Dashboard</h2>
-                <p>View interactive charts of skills demand and salary insights.</p>
+                <h2>📊 JobMiner面板</h2>
+                <p>查看技能需求和薪资的互动图表</p>
             </a>
             <a href="/docs" class="card">
-                <h2>⚙️ API Documentation</h2>
-                <p>Explore and test endpoints interactively using Swagger UI.</p>
+                <h2>⚙️ API文档</h2>
+                <p>使用Swagger UI交互式地探索和测试API</p>
             </a>
         </div>
     </main>
@@ -68,6 +67,6 @@
         © 2025 JobMiner | Built with FastAPI & MySQL | Designed in Python 💜
     </footer>
 
-    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/theme.js" defer></script>
 </body>
 </html>

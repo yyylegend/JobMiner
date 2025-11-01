@@ -31,9 +31,6 @@ Thumbs.db
 logs/
 *.log
 
-# 🗄️ 数据库文件（如果本地有 SQLite）
-db.sqlite3
-
 # 🐳 Docker 运行数据
 **/docker-data/
 **/mysql-data/

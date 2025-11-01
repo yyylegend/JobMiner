@@ -23,19 +23,73 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ================== 🌐 爬虫核心 ==================
-def fetch_boss_jobs(keywords=None, pages=2):
+def get_random_user_agent():
+    """生成随机 User-Agent"""
+    user_agents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    ]
+    return random.choice(user_agents)
+
+def fetch_with_retry(url, headers, max_retries=3, backoff_factor=2.0):
+    """带重试和指数退避的请求函数"""
+    retry_count = 0
+    while retry_count < max_retries:
+        try:
+            # 每次请求使用随机 User-Agent
+            current_headers = headers.copy()
+            current_headers["User-Agent"] = get_random_user_agent()
+            
+            # 添加随机请求参数，避免缓存
+            url_with_random = f"{url}&_t={int(time.time() * 1000)}"
+            
+            # 发送请求
+            resp = requests.get(url_with_random, headers=current_headers, timeout=15)
+            
+            # 检查状态码
+            if resp.status_code != 200:
+                logger.warning(f"请求状态码异常: {resp.status_code}, URL: {url}")
+                raise Exception(f"状态码异常: {resp.status_code}")
+                
+            # 解析 JSON
+            data = resp.json()
+            
+            # 检查是否有数据
+            job_list = data.get("zpData", {}).get("jobList", [])
+            if not job_list:
+                logger.warning(f"没有数据返回，可能被限流: {url}")
+                raise Exception("空数据返回")
+                
+            return data
+            
+        except Exception as e:
+            retry_count += 1
+            wait_time = backoff_factor ** retry_count
+            logger.warning(f"请求失败 ({retry_count}/{max_retries}): {e}, 等待 {wait_time:.1f} 秒后重试...")
+            time.sleep(wait_time)
+    
+    # 所有重试都失败
+    logger.error(f"达到最大重试次数 ({max_retries})，请求失败: {url}")
+    return None
+
+def fetch_boss_jobs(keywords=None, pages=2, max_retries=3):
     """通过官方 JSON 接口爬取 Boss直聘职位数据"""
     if keywords is None:
         keywords = ["数据分析", "Python", "算法工程师", "AI", "大数据"]
 
+    # 基础请求头
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                      "AppleWebKit/537.36 (KHTML, like Gecko) "
-                      "Chrome/124.0.0.0 Safari/537.36",
         "Referer": "https://www.zhipin.com/web/geek/jobs",
         "Accept": "application/json, text/plain, */*",
-        "Accept-Language": "zh-CN,zh;q=0.9",
-        "Cookie": "wt2=DvREW8OQwzxovjTbisVt-8d4wX4yVkjpVjQF0IAxW39Y0PVrSvbHZ-lB20NTuj2_raJCipZheGl-xo4I2stNnRg~~; wbg=0; zp_at=y5A7DnPSVcSDTXNGEQzmrh2jT_DTnzzbLv8SYQmIRaw~; ab_guid=4ffc599d-2639-48e2-b220-228b99b9e595; AMP_8f1ede8e9c=JTdCJTIyZGV2aWNlSWQlMjIlM0ElMjIwY2NhMzc0Mi1hZDM0LTRhYTMtODQyZS1lZTNkN2VlYjI0NzUlMjIlMkMlMjJ1c2VySWQlMjIlM0ElMjIyY2NkZTM0Yy1kMjM2LTQzNDYtYmE0Yy0wNTRjZDdmYTdmMTAlMjIlMkMlMjJzZXNzaW9uSWQlMjIlM0ExNzYxNTc4NTUxNjQyJTJDJTIyb3B0T3V0JTIyJTNBZmFsc2UlN0Q=; AMP_MKTG_8f1ede8e9c=JTdCJTdE; __g=-; Hm_lvt_194df3105ad7148dcf2b98a91b5e727a=1761574140,1761760976; HMACCOUNT=7890B99E63D9AD1B; lastCity=101020100; Hm_lpvt_194df3105ad7148dcf2b98a91b5e727a=1761783484; bst=V2R9olE-T10lxuVtRuyR8eKyO07DrXxS0~|R9olE-T10lxuVtRuyR8eKyO07DrWxCw~; AMP_8f1ede8e9c=JTdCJTIyZGV2aWNlSWQlMjIlM0ElMjIwY2NhMzc0Mi1hZDM0LTRhYTMtODQyZS1lZTNkN2VlYjI0NzUlMjIlMkMlMjJ1c2VySWQlMjIlM0ElMjIyY2NkZTM0Yy1kMjM2LTQzNDYtYmE0Yy0wNTRjZDdmYTdmMTAlMjIlMkMlMjJzZXNzaW9uSWQlMjIlM0ExNzYxNTc4NTUxNjQyJTJDJTIyb3B0T3V0JTIyJTNBZmFsc2UlMkMlMjJsYXN0RXZlbnRUaW1lJTIyJTNBMTc2MTc4NzM0NDAwMiU3RA==; __c=1761760973; __l=l=%2Fwww.zhipin.com%2Fweb%2Fgeek%2Fjobs%3Fcity%3D100010000%26query%3D%25E6%2595%25B0%25E6%258D%25AE%25E5%2588%2586%25E6%259E%2590&r=&g=&s=3&friend_source=0&s=3&friend_source=0; __a=61329115.1761574139.1761574139.1761760973.22.2.12.22; SERVERID=606144fb348bc19e48aededaa626f54e|1761787373|1761760971; __zp_stoken__=7513fRkrDrsOAwpPDh0U3ERMeFhZFNUNKMktNRj5KSUlGSjhLS0ZKQClFNkPDhsOew7hFYsORFUQxSjg4REY4OElPIUpMxY%2FDhUVJPcORw4PDkcSOR2HDlRcpwrgcRcOGGxjDiTbDssOKM8K8w4Q0PMOgw4lFQ0dBwqDDgEPDgVHDhUXDjV%2FDjEDDi0NPQUA%2FR2VYZWFHT1RfYhFdYFBsa1ETV15cPUFFQ0bChMKoM0IdER8SGxYaCBkUHREfwo14FhoIGRQTHxEQFT5KwqrDgMKuxJjEmBvDv8SjwqTCoMKiwqvDtlXEjFPCtVzClXXDhHfDjFFawqjCoMONwq7CtsKhYW7CsmBdY8KAw4TDjsK6dGpbwrB2V8ODZnvDi3gfHAgaEUEbw67Cs8OW"
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+        "sec-ch-ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"Windows"',
+        "Cookie": "wt2=DvREW8OQwzxovjTbisVt-8d4wX4yVkjpVjQF0IAxW39Y0PVrSvbHZ-lB20NTuj2_raJCipZheGl-xo4I2stNnRg~~; wbg=0; zp_at=y5A7DnPSVcSDTXNGEQzmrh2jT_DTnzzbLv8SYQmIRaw~; lastCity=101020100; __zp_seo_uuid__=3e5612c8-1e3a-4544-a770-9ea5a4357b58"
     }
 
     jobs = []
@@ -48,18 +102,12 @@ def fetch_boss_jobs(keywords=None, pages=2):
             print(f"第 {page} 页: {url}")
             logger.info(f"请求: {url}")
 
-            try:
-                resp = requests.get(url, headers=headers, timeout=10)
-                data = resp.json()
-            except Exception as e:
-                logger.error(f"请求或解析失败: {e}")
-                continue
+            # 使用重试机制发送请求
+            data = fetch_with_retry(url, headers, max_retries=max_retries)
+            if not data:
+                continue  # 如果所有重试都失败，跳过此页
 
             job_list = data.get("zpData", {}).get("jobList", [])
-            if not job_list:
-                logger.warning(f"没有数据返回，可能被限流: {url}")
-                continue
-
             for job in job_list:
                 jobs.append({
                     "title": job.get("jobName"),
@@ -70,53 +118,59 @@ def fetch_boss_jobs(keywords=None, pages=2):
                     "keyword": kw
                 })
 
-            time.sleep(random.uniform(1.5, 3.0))  # 防止访问过快被封
+            # 使用更长的随机间隔，避免被检测
+            sleep_time = random.uniform(3.0, 8.0)
+            print(f"等待 {sleep_time:.1f} 秒...")
+            time.sleep(sleep_time)
 
     return jobs
 
 
 # ================== 💾 数据写入 ==================
+def _normalize_salary_text(s: str):
+    s = s or ""
+    s = s.strip()
+    s = re.sub(r"\s+", "", s)
+    s = s.replace("·", "")
+    s = re.sub(r"\d{1,2}薪", "", s)
+    return s
+
+def _compute_salary_value(nums, s_norm: str, take: str):
+    if not nums:
+        return None
+    num = float(nums[0] if take == "min" else nums[-1])
+    s_lower = s_norm.lower()
+
+    unit_factor = 1.0
+    if "万" in s_norm:
+        unit_factor = 10000.0
+    elif "千" in s_norm or "k" in s_lower:
+        unit_factor = 1000.0
+
+    period_factor = 1.0
+    if "年薪" in s_norm or "/年" in s_norm:
+        period_factor = 1.0 / 12.0
+    elif "元/天" in s_norm or "/天" in s_norm or "日薪" in s_norm or "每天" in s_norm or "元天" in s_norm:
+        period_factor = 30.0
+    elif "元/时" in s_norm or "元/小时" in s_norm or "/小时" in s_norm or "时薪" in s_norm:
+        period_factor = 160.0
+
+    value = num * unit_factor * period_factor
+    return int(value)
+
 def parse_salary_min(s: str):
     if not s or "面议" in s:
         return None
-    s = s.replace(" ", "")
-    # 提取数字区间
-    m = re.findall(r"(\d+(?:\.\d+)?)", s)
-    if not m:
-        return None
-    num = float(m[0])
-
-    # 判断单位
-    if "千" in s:
-        num *= 1000
-    elif "万" in s:
-        num *= 10000
-    elif "元/天" in s or "元天" in s:
-        num *= 30  # 估算成月薪
-    elif "年" in s:
-        num /= 12  # 年薪转月薪
-
-    return int(num)
+    s_norm = _normalize_salary_text(s)
+    nums = re.findall(r"(\d+(?:\.\d+)?)", s_norm)
+    return _compute_salary_value(nums, s_norm, take="min")
 
 def parse_salary_max(s: str):
     if not s or "面议" in s:
         return None
-    s = s.replace(" ", "")
-    m = re.findall(r"(\d+(?:\.\d+)?)", s)
-    if not m:
-        return None
-    num = float(m[-1])
-
-    if "千" in s:
-        num *= 1000
-    elif "万" in s:
-        num *= 10000
-    elif "元/天" in s or "元天" in s:
-        num *= 30
-    elif "年" in s:
-        num /= 12
-
-    return int(num)
+    s_norm = _normalize_salary_text(s)
+    nums = re.findall(r"(\d+(?:\.\d+)?)", s_norm)
+    return _compute_salary_value(nums, s_norm, take="max")
 
 def save_to_db(jobs):
     db: Session = SessionLocal()
@@ -147,11 +201,11 @@ def save_to_db(jobs):
         s_max = parse_salary_max(salary_text)
 
         # 过滤异常薪资（>100000 或 <500）
-        if s_max and s_max > 100000:
+        if s_max and s_max >= 100000:
             logger.warning(f"过滤异常薪资岗位：{j['title']} - {salary_text}")
             filtered += 1
             continue
-        if s_min and s_min < 500:
+        if s_min and s_min <= 500:
             logger.warning(f"过滤异常低薪岗位：{j['title']} - {salary_text}")
             filtered += 1
             continue
@@ -193,7 +247,34 @@ def save_to_db(jobs):
 def main():
     print("[JobMiner] 开始抓取 Boss直聘 JSON 接口数据...")
     logger.info("启动 JSON 爬虫任务")
-    jobs = fetch_boss_jobs(["数据分析", "Python"], pages=2)
+    
+    # 添加命令行参数支持
+    import sys
+    keywords = ["大数据"]
+    pages = 2
+    max_retries = 3
+    
+    # 如果有命令行参数，则使用命令行参数
+    if len(sys.argv) > 1:
+        if "--keywords" in sys.argv:
+            idx = sys.argv.index("--keywords")
+            if idx + 1 < len(sys.argv):
+                keywords = sys.argv[idx + 1].split(",")
+                print(f"使用自定义关键词: {keywords}")
+        
+        if "--pages" in sys.argv:
+            idx = sys.argv.index("--pages")
+            if idx + 1 < len(sys.argv):
+                pages = int(sys.argv[idx + 1])
+                print(f"抓取页数: {pages}")
+                
+        if "--retries" in sys.argv:
+            idx = sys.argv.index("--retries")
+            if idx + 1 < len(sys.argv):
+                max_retries = int(sys.argv[idx + 1])
+                print(f"最大重试次数: {max_retries}")
+    
+    jobs = fetch_boss_jobs(keywords, pages=pages, max_retries=max_retries)
     print(f"共抓取 {len(jobs)} 条职位数据。")
     save_to_db(jobs)
     print("数据写入完成。")
